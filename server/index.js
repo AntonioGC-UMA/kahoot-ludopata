@@ -11,12 +11,6 @@ const io = require('socket.io')(server, {
 });
 
 
-//let usuarios = [{"Cabriada":{ foto:null, socket:null}}];
-//let pool = "";
-//let cont = 0;
-///let respuestas = {}
-
-
 function removeA(arr) {
     var what, a = arguments, L = a.length, ax;
     while (L > 1 && arr.length) {
@@ -28,8 +22,6 @@ function removeA(arr) {
     return arr;
 }
 
-
-//const usuarios = ["Raul", "Carlos", "Elo", "Cabriada", "Kanian", "Morilla", "Candy", "Carmen", "Dan", "Isa"];
 
 const usuarios = {
     Raul: {socket:null, votos:0},
