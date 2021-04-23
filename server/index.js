@@ -77,8 +77,6 @@ io.on("connection", (socket) => {
 
     console.log("Usuario conectado")
 
-    socket.emit("set usuarios", usuarios)
-
     // Elegir personaje inicio
     socket.on("conectar", (c) => {
         console.log("seleccionado: ", c)
