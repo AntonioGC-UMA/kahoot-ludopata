@@ -3,6 +3,8 @@ const app = express();
 const http = require('http');
 const path = require('path');
 
+const PORT = process.env.PORT || 8080;
+
 const server = http.createServer(app);
 const io = require('socket.io')(server, {
     cors: { origin: "*" }
@@ -148,6 +150,6 @@ io.on("connection", (socket) => {
     })   
 })
 
-server.listen(8080, () => {
-    console.log('listening on *:8080');
+server.listen(PORT, () => {
+    console.log('listening on *:' + PORT);
 });
