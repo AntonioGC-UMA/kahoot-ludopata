@@ -105,7 +105,7 @@ io.on("connection", (socket) => {
         io.emit("set conectados", conectados)
     }
 
-    socket.on("desconectar", onDesconectar())
+    socket.on("desconectar", onDesconectar)
     socket.on("disconnect", onDesconectar)
 
     // Elegir pool espera
