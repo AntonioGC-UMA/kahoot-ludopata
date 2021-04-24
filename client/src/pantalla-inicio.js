@@ -1,5 +1,5 @@
-import { React, useState, useEffect } from 'react';
-import {Grid, User} from "./grid"
+import { React, useEffect } from 'react';
+import {Grid} from "./grid"
 import {useMediaQuery} from 'react-responsive';
 import {socket} from './socket';
 

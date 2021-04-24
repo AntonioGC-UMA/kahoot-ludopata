@@ -1,24 +1,29 @@
 import { React } from 'react';
-import {Grid} from "./grid"
-import {useMediaQuery} from 'react-responsive';
 import {socket} from './socket';
 
 export const Resultados = ({resultados, isHost}) =>
 {
-    const movil = useMediaQuery({ query : "(max-width: 1224px)"});
-    const portrait = useMediaQuery({ query : "(orientation: portrait)"});
+
+	resultados.sort((a,b) => b.votos - a.votos);
+
+	const max = resultados[0].votos;
+	const unidad = window.innerWidth / (max + 2);
 
     return (
 		<div>
-			<Grid columnas={movil && portrait ? 2 : 5}>
+			<div style={{display: "flex", flexDirection:"column"}}>
 				{
 					resultados.map((elem) =>{
 						return (
-							<p key={elem.nombre}>{elem.nombre + " " + elem.votos}</p>
+							<div key={elem.nombre} style={{textAlign:"center", display:"flex", flexDirection:"row", width: "100%", margin:"1em"}}>
+								<p style={{width: unidad}}>{elem.nombre}</p>
+								<div style={{width: unidad * elem.votos, background: "#07820b", borderRadius:"25px"}}></div>
+								<p style={{width: unidad}}>{elem.votos}</p>
+							</div>							
 						)
 					})
 				}  
-			</Grid>
+			</div>
 			{isHost && <button onClick={() => socket.emit("start round")}>Siguiente</button>}
 		</div>
     )

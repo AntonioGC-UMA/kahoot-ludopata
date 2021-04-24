@@ -20,13 +20,9 @@ const App = () =>
   const [conectados, setConectados] = useState([]);
 
   const [time, setTime] = useState(5)
- 
-
-  //navigator.mediaDevices.getUserMedia esto es para la camara
   
   useEffect(() =>
-  {
-  
+  {  
     socket.on("set conectados", (c) =>
     {
       setConectados(c)

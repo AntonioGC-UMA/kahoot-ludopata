@@ -134,6 +134,10 @@ io.on("connection", (socket) => {
             contador(5, () => 
             {
                 conectados.forEach((elem) => usuarios[elem].socket.once("respuesta", (v) => recivir_voto(v, elem))) 
+
+                Object.keys(usuarios).forEach((elem) => usuarios[elem].votos = 0); // Resetear los votos
+
+                io.emit("set resultados", Object.keys(usuarios).map((elem) => ({nombre:elem, votos:usuarios[elem].votos}))); // Por si nadie responde
                 io.emit("pedir respuestas") //  Te da 5 segundos para responder
             })
         })

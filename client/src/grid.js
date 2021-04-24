@@ -1,4 +1,4 @@
-import { React } from 'react';
+import { React, useEffect, useState } from 'react';
 
 
 export const mapObject = (obj, f) =>
@@ -6,12 +6,29 @@ export const mapObject = (obj, f) =>
     Object.keys(obj).map(f);
 }
 
+export const useSized = () =>
+{
+    const [size, setSize] = useState({width: window.innerWidth, height: window.innerHeight});
 
+    useEffect(() =>
+    {
+        const onResize = () =>
+        {
+            setSize({width: window.innerWidth, height: window.innerHeight});
+        }
+
+        window.addEventListener('resize', onResize);
+
+        return () => window.removeEventListener('resize', onResize);
+    })
+
+    return size;
+}
 
 export const Timer = ({time}) =>
 {
     return (
-        <div style={{borderRadius:"50%", background:"#fdf7e3", position:"absolute", top:"3%", right:"3%"}}>
+        <div style={{background:"#fdf7e3", position:"absolute", top:"0", right:"0", width:"3%", height:"3%"}}>
             {
                 time
             }            
