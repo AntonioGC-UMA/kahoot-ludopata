@@ -1,20 +1,16 @@
 import { React, useEffect, useState } from 'react';
 
 
-export const mapObject = (obj, f) =>
-{
+export const mapObject = (obj, f) => {
     Object.keys(obj).map(f);
 }
 
-export const useSized = () =>
-{
-    const [size, setSize] = useState({width: window.innerWidth, height: window.innerHeight});
+export const useSized = () => {
+    const [size, setSize] = useState({ width: window.innerWidth, height: window.innerHeight });
 
-    useEffect(() =>
-    {
-        const onResize = () =>
-        {
-            setSize({width: window.innerWidth, height: window.innerHeight});
+    useEffect(() => {
+        const onResize = () => {
+            setSize({ width: window.innerWidth, height: window.innerHeight });
         }
 
         window.addEventListener('resize', onResize);
@@ -25,47 +21,43 @@ export const useSized = () =>
     return size;
 }
 
-export const Timer = ({time}) =>
-{
+export const Timer = ({ time }) => {
     return (
-        <div style={{background:"#fdf7e3", position:"absolute", top:"0", right:"0", width:"3%", height:"3%"}}>
+        <div style={{ background: "#fdf7e3", position: "absolute", top: "0", right: "0", width: "3%", height: "3%" }}>
             {
                 time
-            }            
+            }
         </div>
     )
 }
 
-export const Grid = ({columnas, children}) =>
-{
-    
+export const Grid = ({ columnas, children }) => {
+
     return (
-        <div style={{display:"grid", gridTemplateColumns:"repeat("+columnas+", 1fr)", gridGap:"2em"}}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(" + columnas + ", 1fr)", gridGap: "2em" }}>
             {
                 children
-            }            
+            }
         </div>
     )
 }
 
-export const Row = ({children}) =>
-{    
+export const Row = ({ children }) => {
     return (
-        <div style={{display:"flex", flexDirection:"row", alignItems:"center", justifyItems:"center"}}>
+        <div style={{ display: "flex", flexDirection: "row", alignItems: "center", justifyItems: "center" }}>
             {
                 children
-            }            
+            }
         </div>
     )
 }
 
-export const Column = ({children}) =>
-{    
+export const Column = ({ children }) => {
     return (
-        <div style={{display:"flex", flexDirection:"column", alignItems:"center", justifyItems:"center"}}>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyItems: "center" }}>
             {
                 children
-            }            
+            }
         </div>
     )
 }

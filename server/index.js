@@ -21,31 +21,49 @@ function removeA(arr) {
     }
     return arr;
 }
+function shuffle(array) {
+    var currentIndex = array.length, randomIndex;
 
+    // While there remain elements to shuffle...
+    while (0 !== currentIndex) {
 
-const usuarios = {
-    Raul: {socket:null, votos:0},
-    Carlos: {socket:null, votos:0},
-    Elo: {socket:null, votos:0},
-    Cabriada: {socket:null, votos:0},
-    Kanian: {socket:null, votos:0},
-    Morilla: {socket:null, votos:0},
-    Candy: {socket:null, votos:0},
-    Carmen: {socket:null, votos:0},
-    Dan: {socket:null, votos:0},
-    Isa: {socket:null, votos:0},
+        // Pick a remaining element...
+        randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex--;
+
+        // And swap it with the current element.
+        [array[currentIndex], array[randomIndex]] = [
+            array[randomIndex], array[currentIndex]];
+    }
+
+    return array;
 }
 
-const get_user = (socket) =>
-{
-    for (const key in usuarios) 
-        if (usuarios[key].socket === socket) 
+
+let preguntas = shuffle(["Pregunta 1", "Pregunta 2", "Pregunta 3", "Pregunta 4"])
+
+const usuarios = {
+    Raul: { socket: null, votos: 0 },
+    Carlos: { socket: null, votos: 0 },
+    Elo: { socket: null, votos: 0 },
+    Cabriada: { socket: null, votos: 0 },
+    Kanian: { socket: null, votos: 0 },
+    Morilla: { socket: null, votos: 0 },
+    Candy: { socket: null, votos: 0 },
+    Carmen: { socket: null, votos: 0 },
+    Dan: { socket: null, votos: 0 },
+    Isa: { socket: null, votos: 0 },
+}
+
+const get_user = (socket) => {
+    for (const key in usuarios)
+        if (usuarios[key].socket === socket)
             return key;
     return null;
-} 
+}
 
-let conectados = [];
-const pools = {Normales: false, Rapidas: false, Lentas: false, Dobles: false, Random: false};
+let conectados = []
+const pools = { Normales: false, Rapidas: false, Lentas: false, Dobles: false, Random: false }
 const build_path = path.join(__dirname, '../client/build')
 const index_path = path.join(build_path, 'index.html')
 
@@ -67,8 +85,12 @@ app.get('/pools', (_, res) => {
     res.send(pools);
 });
 
-app.get('/resultado', (_, res) =>{
+app.get('/resultado', (_, res) => {
     res.send(re)
+});
+
+app.get('/preguntas', (_, res) => {
+    res.send(preguntas)
 });
 
 
@@ -80,7 +102,7 @@ io.on("connection", (socket) => {
     // Elegir personaje inicio
     socket.on("conectar", (c) => {
         console.log("seleccionado: ", c)
-        if(!usuarios[c] || usuarios[c].socket) return;  // El usuario no existe o ya está conectado
+        if (!usuarios[c] || usuarios[c].socket) return;  // El usuario no existe o ya está conectado
         usuarios[c].socket = socket;
         conectados.push(c);
         socket.emit("conexion aceptada", c);
@@ -90,10 +112,10 @@ io.on("connection", (socket) => {
     const onDesconectar = () => {
         const c = get_user(socket);
         console.log("des-seleccionado: ", c)
-        if(c === null) return;
+        if (c === null) return;
         usuarios[c].socket = null;
-        removeA(conectados, c);      
-        socket.emit("desconectado");   
+        removeA(conectados, c);
+        socket.emit("desconectado");
         io.emit("set conectados", conectados)
     }
 
@@ -107,17 +129,16 @@ io.on("connection", (socket) => {
     })
 
     const recivir_voto = (votado, votador) => {
-        if(!votado) console.log(votador + " no ha votado")
-        else
-        {
+        if (!votado) console.log(votador + " no ha votado")
+        else {
             usuarios[votado].votos += 1;
-            console.log(votador + " ha respondido: " + votado); 
+            console.log(votador + " ha respondido: " + votado);
 
-            io.emit("set resultados", Object.keys(usuarios).map((elem) => ({nombre:elem, votos:usuarios[elem].votos})));
-        }        
+            io.emit("set resultados", Object.keys(usuarios).map((elem) => ({ nombre: elem, votos: usuarios[elem].votos })));
+        }
     }
 
-    // Contador preguntas
+    // Una ronda de preguntas
     socket.on("start round", () => {
 
         const contador = (left, onEnd) => {
@@ -127,21 +148,21 @@ io.on("connection", (socket) => {
             else setTimeout(() => contador(left - 1, onEnd), 1000);
         }
 
-        io.emit("set pregunta", "Texto pregunta");
+        io.emit("set pregunta", preguntas.pop()); // Envia la prpegunta elegida a los participantes 
 
         contador(5, () => {                 //  Muestra pregunta durante 5 segundos
             io.emit("timer done")
-            contador(5, () => 
+            contador(5, () =>               //  Deja otros 5 segundos para responder
             {
-                conectados.forEach((elem) => usuarios[elem].socket.once("respuesta", (v) => recivir_voto(v, elem))) 
+                conectados.forEach((elem) => usuarios[elem].socket.once("respuesta", (v) => recivir_voto(v, elem)))
 
                 Object.keys(usuarios).forEach((elem) => usuarios[elem].votos = 0); // Resetear los votos
 
-                io.emit("set resultados", Object.keys(usuarios).map((elem) => ({nombre:elem, votos:usuarios[elem].votos}))); // Por si nadie responde
-                io.emit("pedir respuestas") //  Te da 5 segundos para responder
+                io.emit("set resultados", Object.keys(usuarios).map((elem) => ({ nombre: elem, votos: usuarios[elem].votos }))); // Por si nadie responde
+                io.emit("pedir respuestas")
             })
         })
-    })   
+    })
 })
 
 server.listen(PORT, () => {

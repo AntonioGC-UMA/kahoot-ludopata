@@ -1,15 +1,14 @@
 import { React, useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
-import {Inicio} from "./pantalla-inicio"
-import {Espera} from "./pantalla-espera"
-import {Resultados} from "./pantalla-resultados"
+import { Inicio } from "./pantalla-inicio"
+import { Espera } from "./pantalla-espera"
+import { Resultados } from "./pantalla-resultados"
 import { Pregunta } from './pantalla-pregunta';
 import { Respuesta } from './pantalla-respuesta';
-import {socket} from './socket';
+import { socket } from './socket';
 
 
-const App = () =>
-{
+const App = () => {
   const personas = ["Raul", "Carlos", "Elo", "Cabriada", "Kanian", "Morilla", "Candy", "Carmen", "Dan", "Isa"];
   const Host = "Carlos"
 
@@ -20,43 +19,42 @@ const App = () =>
   const [conectados, setConectados] = useState([]);
 
   const [time, setTime] = useState(5)
-  
-  useEffect(() =>
-  {  
-    socket.on("set conectados", (c) =>
-    {
+
+  useEffect(() => {
+
+    window.onbeforeunload = () => {
+      socket.disconnect()
+    }
+
+    socket.on("set conectados", (c) => {
       setConectados(c)
     })
 
-    socket.on("time left", (t) =>
-    {
+    socket.on("time left", (t) => {
       setTime(t)
     })
-    socket.on("timer done", () =>
-    {
+    socket.on("timer done", () => {
       setEstado("respuesta")
     })
 
 
-    socket.on("set pregunta", (p) =>
-    {
+    socket.on("set pregunta", (p) => {
       setPregunta(p)
       setEstado("pregunta")
-    })   
-    socket.on("set resultados", (res) =>
-    {
+    })
+    socket.on("set resultados", (res) => {
       setResultados(res)
     })
   });
 
-  if(estado === "eligiendo")  return (<Inicio personas={personas} conectados={conectados} setId={setId} setEstado={setEstado}></Inicio>)  
-  if(estado === "esperando")  return (<Espera conectados={conectados} isHost={id === Host} setId={setId} setEstado={setEstado}></Espera>)
-  if(estado === "pregunta")   return (<Pregunta pregunta={pregunta} time={time}></Pregunta>)
-  if(estado === "respuesta")  return (<Respuesta time={time} personas={personas} setEstado={setEstado}></Respuesta>)
-  if(estado === "resultado")  return (<Resultados resultados={resultados} isHost = {id === Host}></Resultados>)
+  if (estado === "eligiendo") return (<Inicio personas={personas} conectados={conectados} setId={setId} setEstado={setEstado}></Inicio>)
+  if (estado === "esperando") return (<Espera conectados={conectados} isHost={id === Host} setId={setId} setEstado={setEstado}></Espera>)
+  if (estado === "pregunta") return (<Pregunta pregunta={pregunta} time={time}></Pregunta>)
+  if (estado === "respuesta") return (<Respuesta time={time} personas={personas} setEstado={setEstado}></Respuesta>)
+  if (estado === "resultado") return (<Resultados resultados={resultados} isHost={id === Host}></Resultados>)
 }
 
 ReactDOM.render(
-    <App />,
+  <App />,
   document.getElementById('root')
 );
