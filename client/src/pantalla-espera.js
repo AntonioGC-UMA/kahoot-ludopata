@@ -1,52 +1,64 @@
 import { React, useState, useEffect } from 'react';
-import { Column, Grid, } from './grid';
+import { Grid, } from './grid';
 import { socket } from './socket';
+import { useMediaQuery } from 'react-responsive';
 
 export const Espera = ({ isHost, conectados, setId, setEstado }) => {
 
-    const [pools, setPools] = useState({ Normales: false, Rapidas: false, Lentas: false, Dobles: false, Random: false });
+    const [pool, setPool] = useState("normales");
+    let [tipos, setTipos] = useState([])
+
+
+    const movil = useMediaQuery({ query: "(max-width: 1224px)" });
+    const portrait = useMediaQuery({ query: "(orientation: portrait)" });
 
     useEffect(() => {
-        fetch("/pools").then(response => response.json()).then(data => setPools(data))
+        fetch("/pools").then(response => response.json()).then(data => setTipos(data))
 
-        socket.on("set pools", setPools)
+        socket.on("set pool", setPool)
 
         const desconectar = () => {
-            debugger;
             setId("");
             setEstado("eligiendo");
         }
         socket.on("desconectado", desconectar)
 
-        return () => { socket.off("set pools", setPools); socket.off("desconectado", desconectar) }
+        return () => { socket.off("set pool", setPool); socket.off("desconectado", desconectar) }
     }, [setId, setEstado])
 
 
     return (
-        <Grid columnas={3}>
-            <Column>
-                {conectados.map((elem) => (<p key={elem} style={{ aspectRatio: "1/1" }}> {elem} </p>))}
-            </Column>
-            <Column>
-                <button onClick={() => { socket.emit("desconectar"); }}>Cancelar</button>
-                {isHost && <button onClick={() => { socket.emit("set pool", pools); socket.emit("start round") }}>Empezar</button>}
-            </Column>
-            <Column>
+        <div>
+            <Grid columnas={movil && portrait ? 2 : 5}>
                 {
-                    Object.keys(pools).map((elem) => {
+                    conectados.map((elem) => {
                         return (
-                            <button key={elem} onClick={() => {
-                                if (isHost) {
-                                    socket.emit("toggle pool", elem);
-                                }
-                            }}
-                                style={{ textDecoration: pools[elem] ? "none" : "line-through" }}
-                            >
+                            <button key={elem}
+                                style={{ aspectRatio: "1/1" }}>
                                 {elem}
-                            </button>)
+                            </button>
+                        )
                     })
                 }
-            </Column>
-        </Grid>
+            </Grid>
+            <p>
+                <button onClick={() => { socket.emit("desconectar"); }}>Cancelar</button>
+                {isHost &&
+                    <div>
+                        <button onClick={() => { socket.emit("set pool", pool); socket.emit("start round") }}>
+                            Empezar
+                        </button>
+                        <select onChange={(event) => { setPool(event.target.value) }}>
+                            {
+                                tipos.map((elem) => {
+                                    return (<option key={elem}>{elem}</option>)
+                                })
+                            }
+                        </select>
+                    </div>
+                }
+            </p>
+        </div>
+
     )
 }

@@ -9,7 +9,7 @@ import { socket } from './socket';
 
 
 const App = () => {
-  const personas = ["Raul", "Carlos", "Elo", "Cabriada", "Kanian", "Morilla", "Candy", "Carmen", "Dan", "Isa"];
+  const [personas, setPersonas] = useState([]);
   const Host = "Carlos"
 
   const [id, setId] = useState("");
@@ -21,6 +21,8 @@ const App = () => {
   const [time, setTime] = useState(5)
 
   useEffect(() => {
+
+    fetch("/usuarios").then(response => response.json()).then(data => setPersonas(data))
 
     window.onbeforeunload = () => {
       socket.disconnect()
@@ -50,7 +52,7 @@ const App = () => {
   if (estado === "eligiendo") return (<Inicio personas={personas} conectados={conectados} setId={setId} setEstado={setEstado}></Inicio>)
   if (estado === "esperando") return (<Espera conectados={conectados} isHost={id === Host} setId={setId} setEstado={setEstado}></Espera>)
   if (estado === "pregunta") return (<Pregunta pregunta={pregunta} time={time}></Pregunta>)
-  if (estado === "respuesta") return (<Respuesta time={time} personas={personas} setEstado={setEstado}></Respuesta>)
+  if (estado === "respuesta") return (<Respuesta time={time} conectados={personas} setEstado={setEstado}></Respuesta>)
   if (estado === "resultado") return (<Resultados resultados={resultados} isHost={id === Host}></Resultados>)
 }
 

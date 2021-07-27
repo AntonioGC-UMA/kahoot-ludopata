@@ -1,9 +1,13 @@
 import { React, useState, useEffect } from 'react';
-import { Timer } from './grid';
+import { useMediaQuery } from 'react-responsive';
+import { Timer, Grid } from './grid';
 import { socket } from './socket';
 
-export const Respuesta = ({ time, personas, setEstado }) => {
+export const Respuesta = ({ time, conectados, setEstado }) => {
     const [respuesta, setRespuesta] = useState("");
+
+    const movil = useMediaQuery({ query: "(max-width: 1224px)" });
+    const portrait = useMediaQuery({ query: "(orientation: portrait)" });
 
     useEffect(() => {
         const f = () => {
@@ -20,18 +24,20 @@ export const Respuesta = ({ time, personas, setEstado }) => {
             <Timer time={time}></Timer>
 
             <h1>Introduce la respuesta</h1>
-            <ul>
+
+            <Grid columnas={movil && portrait ? 2 : 5}>
                 {
-                    personas.map((elem) => {
+                    conectados.map((elem) => {
                         return (
-                            <li key={elem}>
-                                <button onClick={() => setRespuesta(elem)} style={{ color: elem === respuesta ? 'green' : 'black' }}>
-                                    {elem}
-                                </button>
-                            </li>)
+                            <button key={elem}
+                                style={{ aspectRatio: "1/1", backgroundColor: elem === respuesta ? 'green' : 'rgb(239, 239, 239)' }}
+                                onClick={() => setRespuesta(elem)}>
+                                {elem}
+                            </button>
+                        )
                     })
                 }
-            </ul>
+            </Grid>
         </div>
     )
 }

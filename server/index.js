@@ -1,3 +1,4 @@
+
 const express = require('express');
 const app = express();
 const http = require('http');
@@ -11,6 +12,42 @@ const io = require('socket.io')(server, {
 });
 
 
+
+let retos = {}
+retos["Normal"] = ["Reto CM 1", "Reto CM 2"]
+retos[["Candy", "Morilla"]] = ["Reto CM 1", "Reto CM 2"]
+
+const preguntas = {
+    normales:
+    {
+        texto: ["Pregunta Normal 1", "Pregunta Normal 2", "Pregunta Normal 3", "Pregunta Normal 4"],
+        tiempoPregunta: 5, tiempoRespuesta: 8
+    },
+    lentas:
+    {
+        texto: ["Pregunta Lenta 1", "Pregunta Lenta 2", "Pregunta Lenta 3", "Pregunta Lenta 4"],
+        tiempoPregunta: 8, tiempoRespuesta: 20
+    },
+    //rapidas: ["Pregunta Rapida 1", "Pregunta Rapida 2", "Pregunta Rapida 3", "Pregunta Rapida 4"]
+}
+
+const usuarios = {
+    Raul: { socket: null, votos: 0 },
+    Carlos: { socket: null, votos: 0 },
+    Elo: { socket: null, votos: 0 },
+    Cabriada: { socket: null, votos: 0 },
+    Kanian: { socket: null, votos: 0 },
+    Morilla: { socket: null, votos: 0 },
+    Candy: { socket: null, votos: 0 },
+    Carmen: { socket: null, votos: 0 },
+    Isa: { socket: null, votos: 0 },
+    Helena: { socket: null, votos: 0 },
+    Rafa: { socket: null, votos: 0 },
+    Jenny: { socket: null, votos: 0 },
+}
+
+
+
 function removeA(arr) {
     var what, a = arguments, L = a.length, ax;
     while (L > 1 && arr.length) {
@@ -21,6 +58,7 @@ function removeA(arr) {
     }
     return arr;
 }
+
 function shuffle(array) {
     var currentIndex = array.length, randomIndex;
 
@@ -40,20 +78,13 @@ function shuffle(array) {
 }
 
 
-let preguntas = shuffle(["Pregunta 1", "Pregunta 2", "Pregunta 3", "Pregunta 4"])
 
-const usuarios = {
-    Raul: { socket: null, votos: 0 },
-    Carlos: { socket: null, votos: 0 },
-    Elo: { socket: null, votos: 0 },
-    Cabriada: { socket: null, votos: 0 },
-    Kanian: { socket: null, votos: 0 },
-    Morilla: { socket: null, votos: 0 },
-    Candy: { socket: null, votos: 0 },
-    Carmen: { socket: null, votos: 0 },
-    Dan: { socket: null, votos: 0 },
-    Isa: { socket: null, votos: 0 },
-}
+
+let tipoDePreguntas = "normales"
+
+let setDePreguntas = []
+
+
 
 const get_user = (socket) => {
     for (const key in usuarios)
@@ -63,7 +94,6 @@ const get_user = (socket) => {
 }
 
 let conectados = []
-const pools = { Normales: false, Rapidas: false, Lentas: false, Dobles: false, Random: false }
 const build_path = path.join(__dirname, '../client/build')
 const index_path = path.join(build_path, 'index.html')
 
@@ -82,7 +112,7 @@ app.get('/conectados', (_, res) => {
 });
 
 app.get('/pools', (_, res) => {
-    res.send(pools);
+    res.send(Object.keys(preguntas));
 });
 
 app.get('/resultado', (_, res) => {
@@ -90,7 +120,7 @@ app.get('/resultado', (_, res) => {
 });
 
 app.get('/preguntas', (_, res) => {
-    res.send(preguntas)
+    res.send(preguntas[tipoDePreguntas].texto)
 });
 
 
@@ -123,9 +153,9 @@ io.on("connection", (socket) => {
     socket.on("disconnect", onDesconectar)
 
     // Elegir pool espera
-    socket.on("toggle pool", (pool) => {
-        pools[pool] = !pools[pool];
-        io.emit("set pools", pools)
+    socket.on("set pool", (pool) => {
+        tipoDePreguntas = pool
+        io.emit("set pool", pool)
     })
 
     const recivir_voto = (votado, votador) => {
@@ -134,12 +164,37 @@ io.on("connection", (socket) => {
             usuarios[votado].votos += 1;
             console.log(votador + " ha respondido: " + votado);
 
+            let totalDeVotos = 0
+            let max = [{ nombre: conectados[0], votos: 0 }];
+            for (const key in usuarios) {
+                totalDeVotos += usuarios[key].votos
+                if (usuarios[key].votos > max[0].votos) {
+                    max = [{ nombre: key, votos: usuarios[key].votos }]
+                }
+                else if (usuarios[key].votos === max[0].votos) {
+                    max.push({ nombre: key, votos: usuarios[key].votos })
+                }
+            }
+            // Si ya han votado todos
+            if (totalDeVotos >= conectados.length) {
+                // Si hay empate
+                if (max.length != 1) {
+                    // Si existe reto personalizado
+                    if (retos.hasOwnProperty(max)) {
+                        io.emit("empate personalizado", retos[max])
+                    }
+                    io.emit("empate", max)
+                }
+            }
+
             io.emit("set resultados", Object.keys(usuarios).map((elem) => ({ nombre: elem, votos: usuarios[elem].votos })));
         }
     }
 
     // Una ronda de preguntas
     socket.on("start round", () => {
+
+        setDePreguntas = shuffle(preguntas[tipoDePreguntas].texto)
 
         const contador = (left, onEnd) => {
             io.emit("time left", left);
@@ -148,12 +203,11 @@ io.on("connection", (socket) => {
             else setTimeout(() => contador(left - 1, onEnd), 1000);
         }
 
-        io.emit("set pregunta", preguntas.pop()); // Envia la prpegunta elegida a los participantes 
+        io.emit("set pregunta", setDePreguntas.pop()); // Envia la prpegunta elegida a los participantes
 
-        contador(5, () => {                 //  Muestra pregunta durante 5 segundos
+        contador(preguntas[tipoDePreguntas].tiempoPregunta, () => {
             io.emit("timer done")
-            contador(5, () =>               //  Deja otros 5 segundos para responder
-            {
+            contador(preguntas[tipoDePreguntas].tiempoRespuesta, () => {
                 conectados.forEach((elem) => usuarios[elem].socket.once("respuesta", (v) => recivir_voto(v, elem)))
 
                 Object.keys(usuarios).forEach((elem) => usuarios[elem].votos = 0); // Resetear los votos

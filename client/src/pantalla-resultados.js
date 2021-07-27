@@ -20,11 +20,15 @@ export const Resultados = ({ resultados, isHost }) => {
 		<div>
 			<div style={{ display: "flex", flexDirection: "column" }}>
 				{
-					resultados.map((elem) => {
+					resultados.map((elem, idx) => {
 						return (
 							<div key={elem.nombre} style={{ textAlign: "center", display: "flex", flexDirection: "row", width: "100%", margin: "1em" }}>
-								<p style={{ width: unidad }}>{elem.nombre}</p>
-								<div style={{ width: unidad * elem.votos, background: "#07820b", borderRadius: "25px" }}></div>
+								<p style={{ width: unidad }}>{elem.nombre + (idx === 0 ? "🥇" : idx === 1 ? "🥈" : idx === 2 ? "🥉" : "")}</p>
+								<div style={{
+									width: unidad * max
+								}}>
+									<div style={{ width: unidad * elem.votos, height: "100%", background: "#07820b", borderRadius: "25px" }}></div>
+								</div>
 								<p style={{ width: unidad }}>{elem.votos}</p>
 							</div>
 						)

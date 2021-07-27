@@ -23,7 +23,7 @@ export const useSized = () => {
 
 export const Timer = ({ time }) => {
     return (
-        <div style={{ background: "#fdf7e3", position: "absolute", top: "0", right: "0", width: "3%", height: "3%" }}>
+        <div style={{ background: "#fdf7e3", position: "sticky", top: "0", right: "0", width: "10%", height: "10%" }}>
             {
                 time
             }
@@ -34,7 +34,7 @@ export const Timer = ({ time }) => {
 export const Grid = ({ columnas, children }) => {
 
     return (
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(" + columnas + ", 1fr)", gridGap: "2em" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(" + columnas + ", 1fr)", gridGap: "20px" }}>
             {
                 children
             }
