@@ -15,6 +15,7 @@ const App = () => {
   const [id, setId] = useState("");
   const [pregunta, setPregunta] = useState("");
   const [resultados, setResultados] = useState([]);
+  const [empatados, setEmpatados] = useState([]);
   const [estado, setEstado] = useState("eligiendo");
   const [conectados, setConectados] = useState([]);
 
@@ -47,13 +48,16 @@ const App = () => {
     socket.on("set resultados", (res) => {
       setResultados(res)
     })
+    socket.on("set empatados", (res) => {
+      setEmpatados(res)
+    })
   });
 
   if (estado === "eligiendo") return (<Inicio personas={personas} conectados={conectados} setId={setId} setEstado={setEstado}></Inicio>)
   if (estado === "esperando") return (<Espera conectados={conectados} isHost={id === Host} setId={setId} setEstado={setEstado}></Espera>)
   if (estado === "pregunta") return (<Pregunta pregunta={pregunta} time={time}></Pregunta>)
   if (estado === "respuesta") return (<Respuesta time={time} conectados={personas} setEstado={setEstado}></Respuesta>)
-  if (estado === "resultado") return (<Resultados resultados={resultados} isHost={id === Host}></Resultados>)
+  if (estado === "resultado") return (<Resultados resultados={resultados} empatados={empatados} isHost={id === Host}></Resultados>)
 }
 
 ReactDOM.render(

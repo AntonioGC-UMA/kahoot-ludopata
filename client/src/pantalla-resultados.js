@@ -1,7 +1,7 @@
 import { React, useState, useEffect } from 'react';
 import { socket } from './socket';
 
-export const Resultados = ({ resultados, isHost }) => {
+export const Resultados = ({ resultados, empatados, isHost }) => {
 	resultados.sort((a, b) => b.votos - a.votos);
 
 	const max = resultados[0].votos;
@@ -10,9 +10,10 @@ export const Resultados = ({ resultados, isHost }) => {
 	const [quedanPreguntas, setQuedanPreguntas] = useState(false);
 
 	useEffect(() => {
+		window.scrollTo(0, 0) // queremos ver el top  siempre al principio, por eso reseteo el scroll
+
 		fetch("/preguntas").then(response => response.json()).then(data => {
 			setQuedanPreguntas(data.length > 0)
-			console.log(data)
 		})
 	}, [])
 
@@ -36,6 +37,7 @@ export const Resultados = ({ resultados, isHost }) => {
 				}
 			</div>
 			{isHost && quedanPreguntas && <button onClick={() => socket.emit("start round")}>Siguiente</button>}
+			{isHost && empatados.length > 0 && <button onClick={() => socket.emit("start challenge")}>Reto</button>}
 		</div>
 	)
 }
