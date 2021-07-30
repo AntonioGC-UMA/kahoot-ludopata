@@ -8,14 +8,20 @@ export const Resultados = ({ resultados, empatados, isHost }) => {
 	const unidad = window.innerWidth / (max + 2);
 
 	const [quedanPreguntas, setQuedanPreguntas] = useState(false);
+	const [hayEmpatePersonalizado, sethayEmpatePersonalizado] = useState(false);
 
 	useEffect(() => {
 		window.scrollTo(0, 0) // queremos ver el top  siempre al principio, por eso reseteo el scroll
 
-		fetch("/preguntas").then(response => response.json()).then(data => {
-			setQuedanPreguntas(data.length > 0)
+		fetch("/preguntasRestantes").then(response => response.json()).then(data => {
+			setQuedanPreguntas(data > 0)
 		})
-	}, [])
+
+		fetch("/empates").then(response => response.json()).then(data => {
+			let property = empatados.map(e => e.nombre).sort().join("")
+			sethayEmpatePersonalizado(data.hasOwnProperty(property))
+		})
+	}, [empatados])
 
 	return (
 		<div>
@@ -38,6 +44,7 @@ export const Resultados = ({ resultados, empatados, isHost }) => {
 			</div>
 			{isHost && quedanPreguntas && <button onClick={() => socket.emit("start round")}>Siguiente</button>}
 			{isHost && empatados.length > 0 && <button onClick={() => socket.emit("start challenge")}>Reto</button>}
+			{isHost && hayEmpatePersonalizado && <button onClick={() => socket.emit("start custom challenge", empatados.map(e => e.nombre).sort().join(""))}>Reto personalizado</button>}
 		</div>
 	)
 }
